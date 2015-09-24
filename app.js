@@ -89,6 +89,7 @@ app.get('/select', function(req, res){
 });
 
 app.get('/knowledgeBase', function(req, res){
+ console.log('FORUM: '+req.session.forum);
  forum = zd.getForumDetails(req.session.forum);
  var name = forum.name;
  res.render("knowledgeBase",{name:name,gd: graphBase(req.session.forum, null), orgId:req.session.organization});
@@ -699,11 +700,22 @@ var ticketData = function(id, res, orgId,showModal, result,req) {
             if (!orgId) {
               orgId = zd.getUserOrg(body[0].audits[i].events[j].recipients[0]);
               console.log('THE ORGINIZATION: '+orgId);
+              console.log('THE EVENT '+ JSON.stringify(body[0].audits[i].events[j],null,2,true));
               req.session.organization = orgId;
               req.session.user = zd.getUserEmail(body[0].audits[i].events[j].recipients[0]);
               var record = wf_db[req.session.user];
-              req.session.forum = record.forum;
-              req.session.orgs=record.orgs;
+             // console.log ('THE RECORD: '+JSON.stringify(record));
+              // NO ACCOUNT FOUND? LET EM IN WITH LOOP FORUM IS SAY
+              if (!record) {
+                console.log('GOT HERE.....');
+                req.session.forum='22406362';
+                req.session.orgs='{"Name" :'+orgId+'}';
+                console.log('ELSE: '+req.session.forum+ ' '+JSON.stringify(req.session.orgs));
+              } else {
+                req.session.forum = record.forum;
+                req.session.orgs=record.orgs;
+              //  console.log('ELSE: '+req.session.forum+ ' '+JSON.stringify(req.session.orgs));
+              }
             }
             // WEB CHANNEL REPRESENTS ENTRY FROM ZENDESK SO USE AUTHOR ID AS ALL COMMENTS ARE ENTERED AS ADMIN
             if (body[0].audits[i].via.channel == 'web') {
