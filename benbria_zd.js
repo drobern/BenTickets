@@ -6,7 +6,7 @@ var config = require('./config');
 
 var __zendesk_file = "zd.json";
 
-var interval =  60 * 50 * 50; // secs
+var interval =  60 * 100 * 50; // secs
 var client = zendesk.createClient({
     username: config.username,
     token: config.token,
@@ -151,7 +151,7 @@ var index = {};
 var update = function(){
   console.log("..." + n++); 
   fiveMinute = Math.round((new Date() - (5 * 60 * 1000)) / 1000);
-  //console.log("START TIME: "+start_time+" FIVE MINUTE TIME: "+fiveMinute);
+  console.log("START TIME: "+start_time+" FIVE MINUTE TIME: "+fiveMinute);
   
   if (start_time > fiveMinute)
     start_time = fiveMinute;
@@ -160,7 +160,7 @@ var update = function(){
     if (err) {
       return;
     }
-   // console.log('THE TICKET FIRST THOUSAND: '+JSON.stringify(body));
+    //console.log('THE TICKET FIRST THOUSAND: '+JSON.stringify(body));
     output = [];
     if (start == 0) {
       zd.tickets = body.results;
@@ -184,7 +184,7 @@ var update = function(){
     }
     console.log('END TIME: '+body.end_time);
     start_time = body.end_time;
-  })
+  }) 
 
   client.topics.list(function (err, statusList, body, responseList, resultList) {
     if (err) {
@@ -360,7 +360,7 @@ exports.getTicketList = function (id, callback) {
       console.log("ERROR: "+JSON.stringify(err,null,2,true));
       callback(err);
     }
-   // console.log("THE TICKET LIST: ",JSON.stringify(body,null,2,true));
+    console.log("THE TICKET LIST: ",JSON.stringify(body,null,2,true));
     callback(body);  
   });
 }

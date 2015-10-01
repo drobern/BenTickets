@@ -54,8 +54,20 @@ block content
               li
                 a(href="index") Log Out
         img#benbria.nav.navbar-nav.navbar-right(src="img/benbria_logo.png", hieght="100", width="100", alt="Benbria Logo")
-    .jumbotron
-      h1.titre Change Password
+    .jumbotron(class="carousel slide" id="myCarousel" data-ride="carousel" data-interval="5000")
+      ol.carousel-indicators
+        li(data-target="#myCarousel" data-slide-to="0" class="active")
+        li(data-target="#myCarousel" data-slide-to="1" class)
+        li(data-target="#myCarousel" data-slide-to="2" class)
+      .carousel-inner
+        .item.active
+          img(src="/img/PoleFishing.gif")
+        .item
+          img(src="/img/central.jpg")
+        .item
+          img(src="/img/nuclear.jpg")
+       .container.carousel-overlay.text-center
+        h1.titre Change Password
     .container
       form.form.form-horizontal(role="form" action="/changePass",method="post",enctype="multipart/form-data")
         .form-group

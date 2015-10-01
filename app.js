@@ -841,7 +841,7 @@ var topicData = function(id, forum, res, showModal, result, orgId) {
 
 var graphData = function(id, search, done) {
   console.log("request for handler 'TICKET CHART' was called.");
-  var fields=[];
+  var field=[];
   var graphData = {};
   graphData.cols = [];
   graphData.rows = [];
@@ -860,28 +860,30 @@ var graphData = function(id, search, done) {
    // var body = zd.getBody(id); 
     var orgName = zd.getOrganizationName(id);
    // var body = zd.getTicketBody(orgName);
-    zd.getTicketList(id, function(body) {
-      //console.log('THE TICKET LIST: ',body);
-      if (body.length == 0) {
-        done(false);
-      } else {
-       // for (var i = body.length -1; i >= 0; i--) {
-        for (var i=0;i<body.length; i++) {
-          //console.log('THE TICKET BODY AW: '+JSON.stringify(body[i]), null,2,true);
-          if (body[i].status != 'Deleted') {
-            fieldTest = body[i].custom_fields[2].value.toUpperCase();
-            field = fieldTest.replace(/_/g, " ");
-            var request_test = new Date(body[i].created_at); 
-            var request_date = moment(request_test).format("MMMM Do YYYY");
-            var update_test = new Date(body[i].updated_at)
-            var update_date = moment(update_test).format("MMMM Do YYYY");
-            graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].type,"f":null},{"v":orgName,"f":null},{"v":field,"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
-            j++;
-          }
+   // zd.getTicketList(id, function(body) {
+    var body = zd.getTicketBody(orgName);
+    //console.log('THE TICKET LIST: ',body);
+    if (body.length == 0) {
+      done(false);
+    } else {
+     // for (var i = body.length -1; i >= 0; i--) {
+      for (var i=0;i<body.length; i++) {
+        console.log('THE TICKET BODY AW: '+JSON.stringify(body[i]), null,2,true);
+        if (body[i].status != 'Deleted') {
+         /* fieldTest = body[i].custom_fields[2].value.toUpperCase();
+          field = fieldTest.replace(/_/g, " "); */
+          field = body[i].field_22799616;
+          var request_test = new Date(body[i].created_at); 
+          var request_date = moment(request_test).format("MMMM Do YYYY");
+          var update_test = new Date(body[i].updated_at)
+          var update_date = moment(update_test).format("MMMM Do YYYY");
+          graphData.rows[j] = {"c":[{"v":body[i].id,"f":null},{"v":body[i].subject,"f":null},{"v":body[i].ticket_type,"f":null},{"v":orgName,"f":null},{"v":field,"f":null},{"v":request_date.toString(),"f":null},{"v":update_date.toString(),"f":null},{"v":body[i].status,"f":null},]};
+          j++;
         }
-        done(graphData);
       }
-    });
+      done(graphData);
+    }
+   // });
   } else { 
     var string = search+' type:ticket organization:'+id;
     zd.getQuery(string, function(body) {
@@ -896,7 +898,8 @@ var graphData = function(id, search, done) {
         //for (var i = body.length -1; i >= 0; i--) {
         for (var i=0;i<body.length; i++) {
           console.log("GOT HERE! "+JSON.stringify(body[i],null,2,true));
-          field = body[i].custom_fields[2].value;
+          fieldtest = body[i].custom_fields[2].value;
+          field = fieldtest.replace(/_/g, " ")
           var request_test = new Date(body[i].created_at); 
           var request_date = moment(request_test).format("MMMM Do YYYY");
           var update_test = new Date(body[i].updated_at);

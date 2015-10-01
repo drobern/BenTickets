@@ -2,12 +2,12 @@ extends layout
 block content
   head
     meta(charset="UTF-8")
-    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js")
+    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js")
     script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
     link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
     link(rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
     link(el="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css")
-    script(src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
+    script(src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js")
     meta(name='description', content='Benbria Support Tickets Login')
   body
     nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role="navigation")
@@ -28,8 +28,20 @@ block content
       // Collect the nav links for toggling
       .collapse.navbar-collapse.navbar-ex1-collapse
         img#benbria.nav.navbar-nav.navbar-right(src="img/benbria_logo.png", hieght="100", width="100", alt="Benbria Logo")
-    .jumbotron
-      h1.titre Welcome to Benbria Support! 
+    .jumbotron(class="carousel slide" id="myCarousel" data-ride="carousel" data-interval="5000")
+      ol.carousel-indicators
+        li(data-target="#myCarousel" data-slide-to="0" class="active")
+        li(data-target="#myCarousel" data-slide-to="1" class)
+        li(data-target="#myCarousel" data-slide-to="2" class)
+      .carousel-inner
+        .item.active
+          img(src="/img/PoleFishing.gif")
+        .item
+          img(src="/img/central.jpg")
+        .item
+          img(src="/img/nuclear.jpg")
+       .container.carousel-overlay.text-center
+        h1.titre Welcome to Benbria Support! 
     .container
       form.form.form-horizontal(role="form" action="userCheck" method="post" enctype="multipart/form-data")
         .form-group
