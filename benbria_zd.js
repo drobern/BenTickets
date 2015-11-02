@@ -157,7 +157,7 @@ var update = function(){
     start_time = fiveMinute;
 
   client.tickets.export(start_time, function(err, statusList, body, responseList, resultList) {
-    if (err) {
+    if (err || !body.results) {
       return;
     }
     //console.log('THE TICKET FIRST THOUSAND: '+JSON.stringify(body));
