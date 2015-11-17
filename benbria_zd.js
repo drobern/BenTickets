@@ -14,7 +14,7 @@ var client = zendesk.createClient({
    //remoteUri: 'http://localhost:8080/api/v2'
 });
 
-var zd = {statusList:null, body:[],responseList:null,resultList:null,lastUpdate:null, tickets:[], count:0};
+var zd = {statusList:null, tickets:[],responseList:null,resultList:null,lastUpdate:null, tickets:[], count:0};
 
 client.organizations.list(function (err, statusList, body, responseList, resultList) {
   if (err) {
@@ -211,6 +211,7 @@ var update = function(){
         console.log(err);
         return;
       }
+      //console.log('USER: '+JSON.stringify(zd.user,null,2,true));
       zd.user = body;
   })
 
@@ -279,6 +280,18 @@ exports.getUser = function(id){
   } 
   return result;
 } 
+
+/*exports.getUserEM = function(submitter_name) {
+  if (submitter_name && zd.user) {
+    var result = '';
+    for (var i=0; i<zd.user.length; i++) {
+      if (zd.user[i].name == submitter_name) {
+        reult = zd.user[i].email;
+      }
+    }
+  }
+  return result;
+} */
 
 exports.getUserOrg = function(id){
   if (id && zd.user){
@@ -366,38 +379,39 @@ exports.getTicketList = function (id, callback) {
 }
 
 exports.getAuth = function(ticket){
-  if (ticket && zd.body) {
+  if (ticket && zd.tickets) {
     //console.log(ticket);
     var result = [];
-    for(var i=0; i< zd.body.length; i++)
-       if (zd.body[i].id == ticket)
-       //  console.log (JSON.stringify(zd.body[i].organization_id,null,2,true));
-         result.push(zd.body[i].organization_id);
+    for(var i=0; i< zd.tickets.length; i++)
+       if (zd.tickets[i].id == ticket)
+       //  console.log (JSON.stringify(zd.tickets[i].organization_id,null,2,true));
+         result.push(zd.tickets[i].organization_id);
     return result;
   } else return [];
 }
 
 exports.getTicket = function(id){
-  if (id && zd.body) {
+  if (id && zd.tickets) {
     var result = [];
-    for (var i=0; i< zd.body.length; i++)
-      if (zd.body[i].id == id)
-        result.push(zd.body[i]);
+    for (var i=0; i< zd.tickets.length; i++)
+      if (zd.tickets[i].id == id)
+        result.push(zd.tickets[i]);
     return result
   } 
 }
 
-exports.getTicketAuthor = function(id){
-  if (id && zd.body) {
+/*exports.getTicketAuthor = function(id){
+  if (id && zd.tickets) {
+    //console.log(JSON.stringify(zd.tickets,null,2,true));
     var result = [];
-    for (var i=0; i< zd.body.length; i++)
-      if (zd.body[i].id == id) {
-       result.push(zd.body[i].requester_id);
+    for (var i=0; i< zd.tickets.length; i++)
+      if (zd.tickets[i].id == id) {
+       result.push(zd.tickets[i].submitter_name);
       }
     return result
   } 
   return "unknown";
-}
+} */
 
 //exports.getResponse = function(){return zd.responseList};
 //exports.getResult = function(){return zd.resultList};
@@ -405,8 +419,8 @@ exports.getTicketAuthor = function(id){
 //exports.getUpdate = function(){return zd.lastUpdate};
 exports.getRec = function(){return zd.count};
 exports.getCount = function(){
-  if (zd.body){
-    return zd.body.length;
+  if (zd.tickets){
+    return zd.tickets.length;
   }
   return null;
 }   

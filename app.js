@@ -80,23 +80,30 @@ app.get('/addUser', function(req,res) {
 
 app.get('/select', function(req, res){
   if (req.session.organization) {
-    console.log("value of showModal");
+    console.log("value of showModal "+req.session.user+" "+req.session.organization+" "+req.session.orgs);
     res.render ("select", {organizations:req.session.orgs, username:req.session.user, orgId:req.session.organization, showModal:'false'});  
   } else {
-    console.log("GOT HERE")
-    res.render ("select", {organizations:req.session.orgs, username:req.session.user, orgId:req.session.organization, showModal:'true'} );
+    res.render("index", {showModal:'true',regModal:'false', passModal:'false', username:req.session.username, password:req.session.password});
   }
 });
 
 app.get('/knowledgeBase', function(req, res){
  console.log('FORUM: '+req.session.forum);
- forum = zd.getForumDetails(req.session.forum);
- var name = forum.name;
- res.render("knowledgeBase",{name:name,gd: graphBase(req.session.forum, null), orgId:req.session.organization});
+ if (req.session.organization) {
+  forum = zd.getForumDetails(req.session.forum);
+  var name = forum.name;
+  res.render("knowledgeBase",{name:name,gd: graphBase(req.session.forum, null), orgId:req.session.organization});
+ } else {
+    res.render("index", {showModal:'true',regModal:'false', passModal:'false', username:req.session.username, password:req.session.password});
+ }
 });
 
 app.get('/changePass', function(req, res){
-  res.render ("changePass", {showModal: 'false', username: req.session.user, status: 0, orgId:req.session.organization});
+  if (req.session.organization) {
+    res.render ("changePass", {showModal: 'false', username: req.session.user, status: 0, orgId:req.session.organization});
+  } else {
+    res.render("index", {showModal:'true',regModal:'false', passModal:'false', username:req.session.username, password:req.session.password});
+  }
 });
 
 app.get('/register', function(req, res) {
@@ -105,34 +112,46 @@ app.get('/register', function(req, res) {
 
 app.get('/organization', function(req,res){
   console.log("ORG: "+req.session.organization);
-  req.session.organization=req.query.id;
-  if (req.query.search) {
-    search = req.query.search;
+  if (req.session.organization) {
+    req.session.organization=req.query.id;
+    if (req.query.search) {
+      search = req.query.search;
+    } else {
+      search = null;
+    }
+    for (var i in req.session.orgs) {
+        if (req.session.orgs[i] == req.session.organization)
+            req.session.orgname=i;
+    }
+    console.log ('ORGNAME: '+req.session.orgname);
+  	
+    var done = function(gd) {
+     // page = zd.getPage();
+     res.render("organization",{gd: gd, organization:req.session.organization, orgname:req.session.orgname, search:search});    
+    }
+    graphData(req.query.id, search, done); 
   } else {
-    search = null;
+    res.render("index", {showModal:'true',regModal:'false', passModal:'false', username:req.session.username, password:req.session.password});
   }
-  for (var i in req.session.orgs) {
-      if (req.session.orgs[i] == req.session.organization)
-          req.session.orgname=i;
-  }
-  console.log ('ORGNAME: '+req.session.orgname);
-	
-  var done = function(gd) {
-   // page = zd.getPage();
-   res.render("organization",{gd: gd, organization:req.session.organization, orgname:req.session.orgname, search:search});    
-  }
-  graphData(req.query.id, search, done); 
 });
 
 app.get('/create',function(req,res){
-  ticketNew (req.session.organization,res, false,0);  //organization, showModal, return from create
+  if (req.session.organization) {
+    ticketNew (req.session.organization,res, false,0);  //organization, showModal, return from create
+  } else {
+    res.render("index", {showModal:'true',regModal:'false', passModal:'false', username:req.session.username, password:req.session.password});
+  }
 });
 
 app.get('/topicAdd',function(req,res){
-  forum = zd.getForumDetails(req.session.forum);
-  var name = forum.name;
-  console.log(name);
-  res.render("topicAdd",{result: '', name:name, orgId:req.session.organization, showModal:false});
+  if (req.session.organization) {
+    forum = zd.getForumDetails(req.session.forum);
+    var name = forum.name;
+    console.log(name);
+    res.render("topicAdd",{result: '', name:name, orgId:req.session.organization, showModal:false});
+  } else {
+    res.render("index", {showModal:'true',regModal:'false', passModal:'false', username:req.session.username, password:req.session.password});
+ }
 });
 
 app.get('/ticket',function(req,res){
@@ -670,14 +689,17 @@ var ticketData = function(id, res, orgId,showModal, result,req) {
     // console.log('GOT HERE!!!!\n'+JSON.stringify(body,null,2,true)+ "\nTHE COUNT: "+body[0].count+' '+body[0].next_page);
     var comments = [];
     var newAttachments = [];
-    var user = zd.getTicketAuthor(id);
+    /* var user = zd.getTicketAuthor(id);
+    var user_name = zd.getUserEM(user);
+    console.log('THE USERNAME: '+user_name); */
+    //console.log('THE BODY: '+JSON.stringify(body,null,2,true));
     for (var i = 0; i < body[0].count; i++) {
      //console.log("WHOLE AUDIT: "+JSON.stringify(body.audits[i],null,2,true));
      // INITIALIZED THE COMMENTS OBJECT BEFORE POPULATING
       comment = {};
       comment.attachments = [];
       for (var j = 0; j < body[0].audits[i].events.length; j++) {
-        // console.log("WHOLE EVENT: "+JSON.stringify(body.audits[i].events[j],null,2,true));
+        //console.log("WHOLE EVENT: "+JSON.stringify(body.audits[i].events[j],null,2,true));
         // THE FIRST RECORD IN THE EVENTS AUDIT IS ALWAYS HANDLED AS ORIGINAL TICKET
         if (i == 0 && j== 0) {
          // console.log("FIRST EVENT: "+JSON.stringify(body.audits[i].events[j],null,2,true));
@@ -700,18 +722,22 @@ var ticketData = function(id, res, orgId,showModal, result,req) {
             if (!orgId) {
               orgId = zd.getUserOrg(body[0].audits[i].events[j].recipients[0]);
               console.log('THE ORGINIZATION: '+orgId);
-              console.log('THE EVENT '+ JSON.stringify(body[0].audits[i].events[j],null,2,true));
+              //console.log('THE EVENT '+ JSON.stringify(body[0].audits[i].events[j],null,2,true));
               req.session.organization = orgId;
+              console.log('THE REAL USER: '+JSON.stringify(body[0].audits[i].events[j].recipient[0],null,2,true));
               req.session.user = zd.getUserEmail(body[0].audits[i].events[j].recipients[0]);
               var record = wf_db[req.session.user];
-             // console.log ('THE RECORD: '+JSON.stringify(record));
-              // NO ACCOUNT FOUND? LET EM IN WITH LOOP FORUM IS SAY
+              console.log('EMAIL: '+req.session.user+' THE RECORD: '+JSON.stringify(record,null,2,true));
+              // console.log ('THE RECORD: '+JSON.stringify(record));
+              // NO ACCOUNT FOUND? LET EM IN WITH LOOP FORUM I SAY
               if (!record) {
                 console.log('GOT HERE.....');
                 req.session.forum='22406362';
-                req.session.orgs='{"Name" :'+orgId+'}';
+                req.session.orgs=JSON.parse('{"orgs":{"Name" : "'+orgId+'"}}');
+                req.session.organization = '';
                 console.log('ELSE: '+req.session.forum+ ' '+JSON.stringify(req.session.orgs));
               } else {
+               // var record = wf_db[req.session.user];
                 req.session.forum = record.forum;
                 req.session.orgs=record.orgs;
               //  console.log('ELSE: '+req.session.forum+ ' '+JSON.stringify(req.session.orgs));
@@ -787,8 +813,9 @@ var ticketData = function(id, res, orgId,showModal, result,req) {
         }
       }
     }
+    var orgName = zd.getOrganizationName(orgId);
     // console.log("ALL COMMENT: "+JSON.stringify(comments,null,2,true));
-    res.render("ticket",{result: result, orgId:orgId, showModal:showModal,comments:comments, state:state, description:description,dcreate_date:dcreate_date,id:id,ticket:id,subject:subject,priority:priority,type:type, newAttachments:newAttachments});
+    res.render("ticket",{result: result, orgId:orgId, orgName:orgName, showModal:showModal,comments:comments, state:state, description:description,dcreate_date:dcreate_date,id:id,ticket:id,subject:subject,priority:priority,type:type, newAttachments:newAttachments});
   });
 };
 
@@ -868,7 +895,7 @@ var graphData = function(id, search, done) {
     } else {
      // for (var i = body.length -1; i >= 0; i--) {
       for (var i=0;i<body.length; i++) {
-        console.log('THE TICKET BODY AW: '+JSON.stringify(body[i]), null,2,true);
+        //console.log('THE TICKET BODY AW: '+JSON.stringify(body[i]), null,2,true);
         if (body[i].status != 'Deleted') {
          /* fieldTest = body[i].custom_fields[2].value.toUpperCase();
           field = fieldTest.replace(/_/g, " "); */
