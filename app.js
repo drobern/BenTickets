@@ -80,7 +80,7 @@ app.get('/addUser', function(req,res) {
 
 app.get('/select', function(req, res){
   if (req.session.organization) {
-    console.log("value of showModal "+req.session.user+" "+req.session.organization+" "+req.session.orgs);
+    console.log("value of showModal "+req.session.user+" "+req.session.organization+" "+JSON.stringify(req.session.orgs,null,2,true));
     res.render ("select", {organizations:req.session.orgs, username:req.session.user, orgId:req.session.organization, showModal:'false'});  
   } else {
     res.render("index", {showModal:'true',regModal:'false', passModal:'false', username:req.session.username, password:req.session.password});
@@ -253,6 +253,7 @@ app.post('/userCheck', function(req, res) {
         }
         graphData(req.session.organization, null, done);
       } else {
+        req.session.organization=record.orgs[Object.keys(record.orgs)[0]];
         return res.render("select",{organizations:record.orgs, username:username, res:res, showModal:'false'});
       }
   } else {
@@ -824,8 +825,12 @@ var topicData = function(id, forum, res, showModal, result, orgId) {
   var body = zd.getTopicDetails(id);
   var created_at = moment(new Date(body.created_at)).format("dddd, MMMM Do YYYY, h:mm:ss a");
   var forum = zd.getForumDetails(forum);
-  console.log(JSON.stringify('BODY: '+body));
-  var name = forum.name;
+  console.log(JSON.stringify('BODY: '+JSON.stringify(forum,null,2,true)));
+  if (forum) {
+    var name = forum.name;
+  } else {
+    res.render("index", {showModal:'true',regModal:'false', passModal:'false'});
+  }
   var newAttachments = [];
   if (body.attachments.length != 0) {
     for (var k=0;k<body.attachments.length; k++) {

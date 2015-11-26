@@ -245,6 +245,8 @@ exports.getForumDetails = function(id){
       if (zd.forums[i].id == id)
         return(zd.forums[i]);
     }
+  } else {
+    return("NO Forum Found");
   }
 }
 
